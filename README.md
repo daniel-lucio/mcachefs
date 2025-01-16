@@ -101,4 +101,5 @@ A load of things remains to be done :
 - periodical metadata flush/retrieve/merge, based on a ttl
 - a merging simulation mechanism when the target has changed regardless of the
   mcachefs modifications.
+- FUSE 3 support
 
