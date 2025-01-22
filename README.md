@@ -22,6 +22,10 @@ backing filesystem.
 The target goal is to provide an asynchronous access to a filesystem, for
 example network drives on a travelling laptop.
 
+REQUISITES:
+------------
+* libFuse3
+  
 INSTALLING :
 ------------
 
@@ -101,5 +105,3 @@ A load of things remains to be done :
 - periodical metadata flush/retrieve/merge, based on a ttl
 - a merging simulation mechanism when the target has changed regardless of the
   mcachefs modifications.
-- FUSE 3 support
-
