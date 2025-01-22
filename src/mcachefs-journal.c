@@ -145,14 +145,14 @@ mcachefs_journal_append(mcachefs_journal_op op, const char *path,
     entry.size = size;
 
     if (utimbuf)
-        memcpy(&(entry.utimbuf), utimbuf, sizeof(struct utimbuf));
+        memcpy(&(entry.s_utimbuf), utimbuf, sizeof(struct utimbuf));
     else
-        memset(&(entry.utimbuf), 0, sizeof(struct utimbuf));
+        memset(&(entry.s_utimbuf), 0, sizeof(struct utimbuf));
 
     Log("New journal entry : op=%x : path='%s', to='%s' : "
         "mode=%lo, dev=%ld, uid=%ld, gid=%ld, size=%lu, utimebuf=%lu,%lu\n",
         entry.op, path, to, (long) entry.mode, (long) entry.rdev,
-        (long) entry.uid, (long) entry.gid, (unsigned long) entry.size, entry.utimbuf.actime, entry.utimbuf.modtime);
+        (long) entry.uid, (long) entry.gid, (unsigned long) entry.size, entry.s_utimbuf.actime, entry.s_utimbuf.modtime);
 
     mcachefs_journal_lock();
 
@@ -389,7 +389,7 @@ mcachefs_journal_apply_entry(struct mcachefs_journal_entry_t *entry, const char 
         entry->op <
         mcachefs_journal_op_MAX ? mcachefs_journal_op_label[entry->op] :
         "INVALID", entry->op, path, to, (long) entry->mode,
-        (long) entry->rdev, (long) entry->uid, (long) entry->gid, (unsigned long) entry->size, entry->utimbuf.actime, entry->utimbuf.modtime);
+        (long) entry->rdev, (long) entry->uid, (long) entry->gid, (unsigned long) entry->size, entry->s_utimbuf.actime, entry->s_utimbuf.modtime);
 
     char *realpath = mcachefs_makepath_source(path);
     char *realto = NULL;
@@ -468,7 +468,7 @@ mcachefs_journal_apply_entry(struct mcachefs_journal_entry_t *entry, const char 
         }
         break;
     case mcachefs_journal_op_utime:
-        if (utime(realpath, &(entry->utimbuf)))
+        if (utime(realpath, &(entry->s_utimbuf)))
         {
             Err("Could not utime %s : err=%d:%s\n", realpath, errno, strerror(errno));
         }
@@ -756,7 +756,7 @@ mcachefs_journal_dump(struct mcachefs_file_t *mvops)
                      mcachefs_journal_op_MAX ?
                      mcachefs_journal_op_label[entry.op] : "INVALID",
                      entry.op, path, to, (long) entry.mode,
-                     (long) entry.rdev, (long) entry.uid, (long) entry.gid, (unsigned long) entry.size, entry.utimbuf.actime, entry.utimbuf.modtime);
+                     (long) entry.rdev, (long) entry.uid, (long) entry.gid, (unsigned long) entry.size, entry.s_utimbuf.actime, entry.s_utimbuf.modtime);
         entry_nb++;
     }
 

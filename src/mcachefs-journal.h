@@ -7,6 +7,7 @@
 
 #ifndef MCACHEFSJOURNAL_H_
 #define MCACHEFSJOURNAL_H_
+#include <utime.h>
 
 /**
  * Journal operations
@@ -41,7 +42,7 @@ struct mcachefs_journal_entry_t
     uid_t uid;
     gid_t gid;                  // for chown
     off_t size;                 // for truncate
-    struct utimbuf utimbuf;     // for utime
+    struct utimbuf s_utimbuf;     // for utime
 };
 
 

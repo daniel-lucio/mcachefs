@@ -7,8 +7,9 @@
 
 #ifndef MCACHEFSLOG_H_
 #define MCACHEFSLOG_H_
+#include <stdio.h>
 
-// #define __MCACHEFS_USES_SYSLOG
+#define __MCACHEFS_USES_SYSLOG
 
 #ifdef __MCACHEFS_USES_SYSLOG
 #include <syslog.h>
@@ -25,6 +26,7 @@ extern FILE *LOG_FD;
 #define Log(...)  syslog(LOG_DEBUG, __VA_ARGS__)
 #define Info(...) syslog(LOG_INFO, __VA_ARGS__)
 #define Err(...)  syslog(LOG_ERR, __VA_ARGS__)
+#define Warn(...)  syslog(LOG_WARNING, __VA_ARGS__)
 #define Bug(...)  do { syslog(LOG_CRIT, __VA_ARGS__); ((char*)NULL)[0] = 0; } while(0)
 
 #else

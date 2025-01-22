@@ -9,8 +9,8 @@ CC = gcc
 # CFLAGS += -DDEBUG -D__MCACHEFS_MUTEX_DEBUG -DPARANOID
 # CFLAGS += -O3 -pg -g -fprofile-arcs
 CFLAGS += -O3 -pg
-CFLAGS += -I. -I. -I/usr/include/fuse -Wall -W -D_FILE_OFFSET_BITS=64
-LCFLAGS += -ldl -lpthread -lrt -lfuse
+CFLAGS += -I. -I. -I/usr/include/fuse3 -Wall -W -D_FILE_OFFSET_BITS=64
+LCFLAGS += -ldl -lpthread -lrt -lfuse3
 
 TARGET = mcachefs
 

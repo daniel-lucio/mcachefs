@@ -33,14 +33,14 @@ __mcachefs_fill_stat(struct stat *st, int type, off_t size)
 #define __MCACHEFS_IS_VOPS_FILE(__path) ( strncmp(path, MCACHEFS_VOPS_FILE_PREFIX, 11 ) == 0 )
 
 static int
-mcachefs_getattr(const char *path, struct stat *stbuf)
+mcachefs_getattr(const char *path, struct stat *stbuf, struct fuse_file_info *fi)
 {
     Log("mcachefs_getattr(path = %s, stbuf = ...)\n", path);
     return mcachefs_metadata_getattr(path, stbuf);
 }
 
 static int
-mcachefs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *info)
+mcachefs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *info, enum fuse_readdir_flags flags)
 {
     int res = 0;
     struct mcachefs_metadata_t *mfather, *mchild;
@@ -53,10 +53,10 @@ mcachefs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offs
 
     memset(&st, 0, sizeof(struct stat));
     st.st_mode = S_IFDIR;
-    res = filler(buf, ".", &st, 0);
+    res = filler(buf, ".", &st, 0, 0);
     if (res)
         return res;
-    res = filler(buf, "..", &st, 0);
+    res = filler(buf, "..", &st, 0, 0);
     if (res)
         return res;
 
@@ -69,7 +69,7 @@ mcachefs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offs
     for (mchild = mcachefs_metadata_get_child(mfather); mchild; mchild = mcachefs_metadata_get(mchild->next))
     {
         Log("READDIR    '%s' (%p, next=%llu)\n", mchild->d_name, mchild, mchild->next);
-        res = filler(buf, mchild->d_name, &(mchild->st), 0);
+        res = filler(buf, mchild->d_name, &(mchild->st), 0, 0);
         if (res)
             break;
     }
@@ -284,7 +284,7 @@ mcachefs_rmdir(const char *path)
 }
 
 static int
-mcachefs_rename(const char *path, const char *to)
+mcachefs_rename(const char *path, const char *to, unsigned int flags)
 {
     int res;
     char *backingpath, *backingto;
@@ -383,7 +383,7 @@ mcachefs_link(const char *from, const char *to)
 }
 
 static int
-mcachefs_chmod(const char *path, mode_t mode)
+mcachefs_chmod(const char *path, mode_t mode, struct fuse_file_info *fi)
 {
     struct mcachefs_metadata_t *mdata;
     static const mode_t umask = 0777;
@@ -403,7 +403,7 @@ mcachefs_chmod(const char *path, mode_t mode)
 }
 
 static int
-mcachefs_chown(const char *path, uid_t uid, gid_t gid)
+mcachefs_chown(const char *path, uid_t uid, gid_t gid, struct fuse_file_info *fi)
 {
     struct mcachefs_metadata_t *mdata;
 
@@ -434,7 +434,7 @@ mcachefs_chown(const char *path, uid_t uid, gid_t gid)
 }
 
 static int
-mcachefs_truncate(const char *path, off_t size)
+mcachefs_truncate(const char *path, off_t size, struct fuse_file_info *fi)
 {
     struct mcachefs_file_t *mfile;
     char *backingpath;
@@ -503,20 +503,21 @@ mcachefs_truncate(const char *path, off_t size)
 }
 
 static int
-mcachefs_utime(const char *path, struct utimbuf *buf)
+mcachefs_utime(const char *path, const struct timespec *buf, struct fuse_file_info *fi)
 {
     struct mcachefs_metadata_t *mdata;
-    Log("mcachefs_utime(path = %s, act=%lu, mod=%lu)\n", path, buf->actime, buf->modtime);
+    struct utimbuf utimbuf;
+    Log("mcachefs_utime(path = %s, act=%lu, mod=%lu)\n", path, buf->tv_sec, buf->tv_sec);
 
     if ((mdata = mcachefs_metadata_find(path)) == NULL)
         return -ENOENT;
 
-    mdata->st.st_atime = buf->actime;
-    mdata->st.st_mtime = buf->modtime;
+    utimbuf.actime = mdata->st.st_atime = buf->tv_sec;
+    utimbuf.modtime = mdata->st.st_mtime = buf->tv_sec;
 
     mcachefs_metadata_release(mdata);
 
-    mcachefs_journal_append(mcachefs_journal_op_utime, path, NULL, 0, 0, 0, 0, 0, buf);
+    mcachefs_journal_append(mcachefs_journal_op_utime, path, NULL, 0, 0, 0, 0, 0, &utimbuf);
 
     return 0;
 }
@@ -688,7 +689,7 @@ mcachefs_flush(const char *path, struct fuse_file_info *info)
 }
 
 static void *
-mcachefs_init(struct fuse_conn_info *conn)
+mcachefs_init(struct fuse_conn_info *conn, struct fuse_config *fconfig)
 {
     (void) conn;
 
@@ -715,15 +716,20 @@ mcachefs_destroy(void *conn)
 }
 
 struct fuse_operations mcachefs_oper = {.getattr = mcachefs_getattr,.readlink = mcachefs_readlink,
-    .getdir = NULL,.mknod = mcachefs_mknod,.mkdir = mcachefs_mkdir,
+//    .getdir = NULL,
+    .mknod = mcachefs_mknod,.mkdir = mcachefs_mkdir,
     .unlink = mcachefs_unlink,.rmdir = mcachefs_rmdir,.symlink =
         mcachefs_symlink,.rename = mcachefs_rename,.link =
-        mcachefs_link,.chmod = mcachefs_chmod,.chown = mcachefs_chown,.truncate = mcachefs_truncate,.utime = mcachefs_utime,.open = mcachefs_open,
+        mcachefs_link,.chmod = mcachefs_chmod,.chown = mcachefs_chown,.truncate = mcachefs_truncate,
+//        .utimens = mcachefs_utime,
+        .open = mcachefs_open,
     .read = mcachefs_read,.write = mcachefs_write,.statfs = NULL,
     .flush = mcachefs_flush,.release = mcachefs_release,.fsync = mcachefs_fsync,.setxattr = NULL,.getxattr = NULL,
     .listxattr = NULL,.opendir = NULL,.readdir = mcachefs_readdir,
     .fsyncdir = NULL,.init = mcachefs_init,
     .destroy = mcachefs_destroy,.access = NULL,.create = NULL,
-    .ftruncate = NULL,.fgetattr = NULL,.lock = NULL,.utimens = NULL,
+//    .ftruncate = NULL,
+//    .fgetattr = NULL,
+    .lock = NULL,.utimens = NULL,
     .bmap = NULL,
 };

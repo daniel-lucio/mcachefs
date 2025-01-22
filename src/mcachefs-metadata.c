@@ -3,6 +3,7 @@
 #include "mcachefs-vops.h"
 #include "mcachefs-transfer.h"
 #include "mcachefs-journal.h"
+#include "mcachefs-log.h"
 
 /**********************************************************************
  Metadata functions
