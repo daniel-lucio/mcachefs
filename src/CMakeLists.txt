@@ -65,6 +65,7 @@ ELSE (WITH_XATTR)
 	add_definitions(-DDISABLE_XATTR)
 ENDIF (WITH_XATTR)
 
+find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBFUSE3 IMPORTED_TARGET fuse3)
 IF(${LIBFUSE3_FOUND})
     execute_process(COMMAND bash "-c" "echo -n ${LIBFUSE3_VERSION}|cut -d '.' -f 1,2 |sed s/'\\.'//g|tr -d '\n'" OUTPUT_VARIABLE LIBFUSE_VERSION2)
