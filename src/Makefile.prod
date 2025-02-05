@@ -8,7 +8,7 @@ CC = gcc
 # CFLAGS += -g -O0
 CFLAGS += -O3
 # CFLAGS += -pg
-CFLAGS += -DHAVE_CONFIG_H -I. -I. -I/usr/include/fuse -Wall -W -D_FILE_OFFSET_BITS=64
+CFLAGS += -DHAVE_CONFIG_H -I. -I. -I/usr/include/ -Wall -W -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=30
 LCFLAGS += -lpthread -lrt -ldl -lfuse
 
 TARGET = mcachefs
