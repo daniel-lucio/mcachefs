@@ -70,7 +70,7 @@ pkg_check_modules(LIBFUSE3 IMPORTED_TARGET fuse3)
 IF(${LIBFUSE3_FOUND})
     execute_process(COMMAND bash "-c" "echo -n ${LIBFUSE3_VERSION}|cut -d '.' -f 1,2 |sed s/'\\.'//g|tr -d '\n'" OUTPUT_VARIABLE LIBFUSE_VERSION2)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DFUSE_USE_VERSION=${LIBFUSE_VERSION2}")
-    target_link_libraries(siafs PUBLIC ${LIBFUSE3_LIBRARIES})
+    target_link_libraries(mcachefs PUBLIC ${LIBFUSE3_LIBRARIES})
 ENDIF(${LIBFUSE3_FOUND})
 
 install(FILES ../extra-scripts/mount.mcachefs DESTINATION sbin)
