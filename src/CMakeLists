@@ -72,4 +72,5 @@ IF(${LIBFUSE3_FOUND})
     target_link_libraries(siafs PUBLIC ${LIBFUSE3_LIBRARIES})
 ENDIF(${LIBFUSE3_FOUND})
 
+install(FILES ../extra-scripts/mount.mcachefs DESTINATION sbin)
 install(TARGETS mcachefs RUNTIME DESTINATION bin)
