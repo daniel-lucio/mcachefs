@@ -29,8 +29,15 @@ REQUISITES:
 INSTALLING :
 ------------
 
-(No autotools, so no ./configure... Just make and make install for now).
-
+(No autotools, so no ./configure... Just make and make install for now). 
+Or alternatively, the new CMake recommended way. It will find all your libraries if they are not in the standard paths.
+```
+cd src
+mkdir build
+cd build
+cmake ..
+make
+```
 USING :
 -------
 
@@ -38,7 +45,7 @@ mcachefs used to look for a config file to determine where the target and
 backing filesystems were located, but these days are over.
 
 Now all settings must be provided using command-line arguments. mcachefs
-requires at least two arguments : the source and the mountpoint.
+requires at least two arguments: the source and the mount point.
 
 Let's say you want to mirror dir /media/input to /media/output.
 Just call :
